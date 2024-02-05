@@ -17,7 +17,7 @@ int xparsed = 2;
 bool setupparsed = false;
 String dParsed[21];
 int frameatual = 1;
-int ultimoframetempo = 0;
+unsigned long ultimoframetempo = 0;
 
 
 char recebidos[21][256];
@@ -170,7 +170,7 @@ void animarequest(String url) {
 
 
     }
-    msg="chatAnima";
+    msg="animachat";
 
     http.end();
 }
@@ -234,12 +234,18 @@ void callback(IRCMessage ircMessage) {
         }
         if (param != NULL && strcmp(param, "show") == 0) { // verifica se a segunda palavra é "debug"
           param = strtok(NULL, " "); // Avança para a próxima palavra
-          desenhar(parsefile(String(param)));
-      
+          desenhar(parsefile(String(param)));      
         }
+        if (param != NULL && strcmp(param, "play") == 0) { // verifica se a segunda palavra é "debug"
+          param = strtok(NULL, " "); // Avança para a próxima palavra
+          if (param != NULL && strcmp(param, "salvo") == 0) { // verifica se a segunda palavra é "debug"
+            param = strtok(NULL, " "); // Avança para a próxima palavra
+          }
+          msg = "animachat";
+          //playChat2();
  
-  }       
-
+        }       
+      }
   
 
 
@@ -254,7 +260,7 @@ void callback(IRCMessage ircMessage) {
         }
       if(ircMessage.text.indexOf("anima=") != -1) //verificar se tem o anima
         { 
-        limpaAnimaCache(); 
+        //limpaAnimaCache(); 
         setupparsed = false;
         Serial.println("Animação recebida!"); //informa que recebeu e detectou um link valido
         animarequest(ircMessage.text);  //chama a função que faz o request na url recebida
@@ -263,6 +269,7 @@ void callback(IRCMessage ircMessage) {
   
   
 }
+
 
 void setupTWconnection(){
 
@@ -332,19 +339,17 @@ void lerArquivo(const char* filename) {
   file.close();
 }
 
-
-void playChat2(int tempof){
+/*
+void playChat2(){
   unsigned long currentTime = millis();
-
-    // Verifica se já passou tempo suficiente para o próximo frame
+// Verifica se já passou tempo suficiente para o próximo frame
   if (currentTime - ultimoframetempo >= parsefile("ms").toInt()) {
     // Executa o próximo frame
     if (frameatual < parsefile("x").toInt()) {
       //String framename = "d"+String(frameatual);
       //senão, da flash, com limitação de velocidade
         String framename = "d"+String(frameatual);
-        desenhar(parsefile(framename));
-      
+        desenhar(parsefile(framename));     
             
       frameatual++;
       if(frameatual == parsefile("x").toInt()){
@@ -354,12 +359,34 @@ void playChat2(int tempof){
     } else {
       // Reinicia a animação se chegou ao último frame
       frameatual = 0;
-    }
-    
+    }    
     // Atualiza o tempo do último frame
     ultimoframetempo = currentTime;
   }
   
+
+}
+
+*/
+
+void playChat2(){
+  if(!setupparsed){
+    setupparsed = true;
+  }
+
+  unsigned long currentTime = millis();
+// Verifica se já passou tempo suficiente para o próximo frame
+  if (currentTime - ultimoframetempo >= parsefile("ms").toInt()) {
+    // Executa o próximo frame
+    if (frameatual < parsefile("x").toInt()) {
+        String framename = "d"+String(frameatual);
+        desenhar(parsefile(framename));
+        xparsed++;        
+    ultimoframetempo = currentTime;
+    Serial.println("playando frame: "+framename);
+    }
+  
+}
 
 }
 
